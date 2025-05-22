@@ -1,7 +1,7 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from parser import extract_text_from_pdf
+from parser import extract_text_and_metadata
 
-app = FastAPI()
+app = FastAPI(title="mcp-pdf-parser")
 
 @app.post("/extract-text/")
 async def extract_text(file: UploadFile = File(...)):
@@ -9,10 +9,10 @@ async def extract_text(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Only PDF files are supported.")
     pdf_bytes = await file.read()
     try:
-        text = extract_text_from_pdf(pdf_bytes)
+        chunks, metadata = extract_text_and_metadata(pdf_bytes)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error parsing PDF: {str(e)}")
-    return {"text": text}
+        raise HTTPException(status_code=500, detail=str(e))
+    return {"chunks": chunks, "metadata": metadata}
 
 @app.get("/")
 def read_root():
