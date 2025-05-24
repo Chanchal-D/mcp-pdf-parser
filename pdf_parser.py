@@ -1,4 +1,4 @@
-import fitz  # PyMuPDF
+import fitz  # PyMuPDF 1
 from langdetect import detect, LangDetectException
 
 def extract_text_and_metadata(pdf_bytes: bytes):
