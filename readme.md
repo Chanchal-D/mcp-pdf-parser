@@ -1,89 +1,67 @@
 # MCP PDF Parser
 
-A FastAPI microservice for extracting and chunking text from PDF files, with automatic metadata and language detection.
+This project provides tools to extract text and metadata from PDF files, either from local files or URLs, using Python. It is designed to be used as part of the MCP (Modular Command Platform) framework, but can be adapted for other uses.
 
 ## Features
+- Extracts text and metadata (title, author, language) from PDF files.
+- Supports reading PDFs from local file paths or remote URLs.
+- Provides MCP tool endpoints for integration.
 
-- **POST `/extract-text/`**: Upload a PDF and receive extracted text chunks and metadata (title, author, language).
-- **Automatic language detection** using `langdetect`.
-- **Metadata extraction** (title, author) from PDF.
-- **Simple text chunking** for easier downstream processing.
-- **Swagger UI** for easy testing.
+## File Overview
 
-## Project Structure
+### main.py
+- Implements the core MCP tools:
+  - `read_local_pdf(path: str)`: Reads and extracts text/metadata from a local PDF file.
+  - `read_pdf_url(url: str)`: Reads and extracts text/metadata from a PDF at a given URL.
+  - `read_root()`: Returns a welcome message.
+- Uses `extract_text_and_metadata` from `pdf_parser.py` for PDF processing.
+- Can be run as a script with `mcp.run(transport="stdio")`.
 
-```
-mcp-pdf-parser/
-├── main.py         # FastAPI entry point
-├── parser.py       # PDF parsing and logic
-├── requirements.txt
-└── .gitignore
-```
+### api_main.py
+- (Currently empty, but typically would be used to expose the same tools via a web API, e.g., using FastAPI.)
+- You can implement a FastAPI app here to provide HTTP endpoints for PDF parsing.
 
-## Requirements
+## Setup
 
-- Python 3.8+
-- [PyMuPDF (`pymupdf`)](https://pymupdf.readthedocs.io/)
-- [langdetect](https://pypi.org/project/langdetect/)
-- fastapi
-- uvicorn
-- python-multipart
-
-Install dependencies:
-
-```bash
-pip install fastapi uvicorn pymupdf langdetect python-multipart
-```
+1. **Clone the repository:**
+   ```bash
+   git clone <https://github.com/Chanchal-D/mcp-pdf-parser>
+   cd mcp-pdf-parser
+   ```
+2. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+   Ensure you have the following packages (add to `requirements.txt` if missing):
+   - PyMuPDF (fitz)
+   - langdetect
+   - requests
+   - mcp (and its dependencies)
 
 ## Usage
 
-### 1. Start the server
-
+### As MCP Tool
+Run the main script:
 ```bash
-uvicorn main:app --reload
+python main.py
 ```
 
-### 2. Test the API
-
-- Open [http://localhost:8000/docs](http://localhost:8000/docs) for Swagger UI.
-- Use the `/extract-text/` endpoint to upload a PDF and view the response.
-
-#### Example cURL
-
-```bash
-curl -X POST "http://localhost:8000/extract-text/" -F "file=@yourfile.pdf"
+### Example: Read Local PDF
+```python
+from main import read_local_pdf
+result = await read_local_pdf('path/to/file.pdf')
+print(result)
 ```
 
-### 3. Example Response
-
-```json
-{
-  "chunks": [
-    "First chunk of text...",
-    "Second chunk of text..."
-  ],
-  "metadata": {
-    "title": "Sample PDF",
-    "author": "John Doe",
-    "language": "en"
-  }
-}
+### Example: Read PDF from URL
+```python
+from main import read_pdf_url
+result = await read_pdf_url('https://example.com/file.pdf')
+print(result)
 ```
 
-## Endpoints
+### Extending with FastAPI (api_main.py)
+You can implement a FastAPI app in `api_main.py` to provide HTTP endpoints for PDF parsing. Uncomment and adapt the FastAPI code in `main.py` as needed.
 
-- `POST /extract-text/`  
-  Upload a PDF file. Returns extracted text chunks and metadata.
-
-- `GET /`  
-  Welcome message.
-
-## Notes
-
-- Only PDF files are supported.
-- Language detection may not be accurate for very short or non-text PDFs.
-- Text chunking is basic (by double newlines or every 1000 characters).
-
----
-
-**MIT License**
+## License
+MIT License
